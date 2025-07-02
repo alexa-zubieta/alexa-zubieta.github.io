@@ -115,11 +115,11 @@
             <button onclick="format('bold')"><b>B</b></button>
             <button onclick="format('italic')"><i>I</i></button>
             <button onclick="format('underline')"><u>U</u></button>
-            <select onchange="format('fontSize', this.value)">
-                <option value="3">Normal</option>
-                <option value="1">Small</option>
-                <option value="5">Large</option>
-                <option value="7">Huge</option>
+            <select onchange="applyFontSize(this.value)">
+                <option value="16px">Normal</option>
+                <option value="12px">Small</option>
+                <option value="24px">Large</option>
+                <option value="36px">Huge</option>
             </select>
             <input type="color" onchange="format('foreColor', this.value)" title="Color de Texto">
             <button onclick="format('insertUnorderedList')" title="Lista con viñetas">• List</button>
@@ -148,7 +148,44 @@
         // Función para aplicar formato al texto
         function format(command, value = null) {
             document.execCommand(command, false, value);
-            document.getElementById('editor').focus(); // Mantener el foco en el editor
+            document.getElementById('editor').focus();
+        }
+
+        // Función para aplicar tamaño de fuente usando estilos CSS
+        function applyFontSize(sizeValue) {
+            const selection = window.getSelection();
+            if (selection.rangeCount > 0) {
+                const range = selection.getRangeAt(0);
+                const content = range.extractContents();
+                
+                const fragment = document.createDocumentFragment();
+                fragment.appendChild(content);
+
+                // Elimina cualquier etiqueta <font> existente para evitar conflictos
+                fragment.querySelectorAll('font').forEach(fontTag => {
+                    while (fontTag.firstChild) {
+                        fontTag.parentNode.insertBefore(fontTag.firstChild, fontTag);
+                    }
+                    fontTag.parentNode.removeChild(fontTag);
+                });
+
+                // Crea un nuevo <span> con el estilo de font-size
+                const span = document.createElement('span');
+                span.style.fontSize = sizeValue;
+                
+                if (fragment.hasChildNodes()) {
+                    span.appendChild(fragment);
+                } else {
+                    span.textContent = '\uFEFF'; // Carácter para que el cursor pueda entrar
+                }
+                
+                range.insertNode(span);
+                
+                range.selectNodeContents(span);
+                selection.removeAllRanges();
+                selection.addRange(range);
+            }
+            document.getElementById('editor').focus();
         }
 
         // Función para insertar un enlace
@@ -165,8 +202,7 @@
             const imageUrl = document.getElementById('imageUrl').value;
             let richTextContent = document.getElementById('editor').innerHTML;
 
-            // La clave aquí: insertamos el contenido del editor directamente en el div
-            // sin la etiqueta <p> envolvente, que causaba problemas con elementos de bloque.
+            // Inserta el contenido del editor directamente en el div sin la etiqueta <p> envolvente.
             const generatedHtml = `
 <div class="survey-question-wrapper custom-image-top-split">
     <div class="question-text-half">
