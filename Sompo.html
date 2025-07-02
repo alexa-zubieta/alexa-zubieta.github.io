@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Generador de HTML Personalizado</title>
+    <title>Custom HTML Generator</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -104,10 +104,10 @@
 </head>
 <body>
     <div class="container">
-        <h1>Generador de HTML Personalizado</h1>
+        <h1>Custom HTML Generator</h1>
 
         <div>
-            <label for="imageUrl">URL de la Imagen:</label>
+            <label for="imageUrl">Image URL:</label>
             <input type="text" id="imageUrl" placeholder="Introduce la URL de la imagen aquí (ej: /ruta/a/mi/imagen.png)">
         </div>
 
@@ -117,30 +117,30 @@
             <button onclick="format('underline')"><u>U</u></button>
             <select onchange="format('fontSize', this.value)">
                 <option value="3">Normal</option>
-                <option value="1">Pequeño</option>
-                <option value="5">Grande</option>
-                <option value="7">Enorme</option>
+                <option value="1">Small</option>
+                <option value="5">Large</option>
+                <option value="7">Huge</option>
             </select>
             <input type="color" onchange="format('foreColor', this.value)" title="Color de Texto">
-            <button onclick="format('insertUnorderedList')" title="Lista con viñetas">• Lista</button>
-            <button onclick="format('insertOrderedList')" title="Lista numerada">1. Lista</button>
-            <button onclick="format('justifyLeft')" title="Alinear a la izquierda">Izquierda</button>
-            <button onclick="format('justifyCenter')" title="Centrar">Centro</button>
-            <button onclick="format('justifyRight')" title="Alinear a la derecha">Derecha</button>
+            <button onclick="format('insertUnorderedList')" title="Lista con viñetas">• List</button>
+            <button onclick="format('insertOrderedList')" title="Lista numerada">1. List</button>
+            <button onclick="format('justifyLeft')" title="Alinear a la izquierda">Left</button>
+            <button onclick="format('justifyCenter')" title="Centrar">Center</button>
+            <button onclick="format('justifyRight')" title="Alinear a la derecha">Right</button>
             <button onclick="insertLink()" title="Insertar Enlace">Link</button>
         </div>
 
         <div>
-            <label for="editor">Texto Enriquecido:</label>
+            <label for="editor">Rich Text:</label>
             <div id="editor" contenteditable="true"></div>
         </div>
 
         <div class="buttons-bottom">
-            <button onclick="generateHtml()">Generar HTML</button>
-            <button onclick="copyHtml()">Copiar HTML</button>
+            <button onclick="generateHtml()">Generate HTML</button>
+            <button onclick="copyHtml()">Copy HTML</button>
         </div>
 
-        <h2>HTML Generado:</h2>
+        <h2>HTML Generated:</h2>
         <pre id="outputHtml"></pre>
     </div>
 
@@ -153,7 +153,7 @@
 
         // Función para insertar un enlace
         function insertLink() {
-            const url = prompt("Introduce la URL del enlace:");
+            const url = prompt("Enter the URL:");
             if (url) {
                 format("createLink", url);
             }
@@ -182,11 +182,11 @@
             const outputElement = document.getElementById('outputHtml');
             navigator.clipboard.writeText(outputElement.textContent)
                 .then(() => {
-                    alert('HTML copiado al portapapeles!');
+                    alert('HTML copied to clipboard!');
                 })
                 .catch(err => {
                     console.error('Error al copiar el HTML: ', err);
-                    alert('No se pudo copiar el HTML. Por favor, selecciónalo y cópialo manualmente.');
+                    alert('Failed to copy HTML. Please, copy manually.');
                 });
         }
     </script>
