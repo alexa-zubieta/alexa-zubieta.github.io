@@ -29,7 +29,7 @@
             color: #333;
         }
         input[type="text"] {
-            width: calc(100% - 22px); /* Adjust for padding and border */
+            width: calc(100% - 22px);
             padding: 10px;
             margin-bottom: 20px;
             border: 1px solid #ddd;
@@ -59,7 +59,7 @@
             background-color: #e0e0e0;
         }
         .toolbar select {
-            padding-right: 25px; /* Space for dropdown arrow */
+            padding-right: 25px;
         }
         #editor {
             min-height: 250px;
@@ -69,8 +69,8 @@
             box-sizing: border-box;
             background-color: #fff;
             margin-bottom: 20px;
-            outline: none; /* Remove blue outline on focus */
-            overflow-y: auto; /* Enable scroll if content overflows */
+            outline: none;
+            overflow-y: auto;
         }
         .buttons-bottom {
             display: flex;
@@ -163,13 +163,14 @@
         // Función para generar el HTML final
         function generateHtml() {
             const imageUrl = document.getElementById('imageUrl').value;
-            const richTextContent = document.getElementById('editor').innerHTML;
+            let richTextContent = document.getElementById('editor').innerHTML;
 
-            // Tu plantilla HTML predeterminada
+            // La clave aquí: insertamos el contenido del editor directamente en el div
+            // sin la etiqueta <p> envolvente, que causaba problemas con elementos de bloque.
             const generatedHtml = `
 <div class="survey-question-wrapper custom-image-top-split">
     <div class="question-text-half">
-        <p>${richTextContent}</p>
+        ${richTextContent}
     </div>
     <div class="image-half"><img alt="Imagen" src="${imageUrl}" /></div>
 </div>
