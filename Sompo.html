@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>1.Custom HTML Generator</title>
+    <title>Custom HTML Generator</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -151,46 +151,71 @@
             document.getElementById('editor').focus();
         }
 
-        // Función para aplicar tamaño de fuente usando estilos CSS
+        // Función para aplicar tamaño de fuente usando estilos CSS (MODIFICADA para limpiar anidaciones)
         function applyFontSize(sizeValue) {
+            const editor = document.getElementById('editor');
             const selection = window.getSelection();
             if (selection.rangeCount > 0) {
                 const range = selection.getRangeAt(0);
-                const content = range.extractContents();
                 
+                // Extraer el contenido seleccionado
+                const extractedContent = range.extractContents();
                 const fragment = document.createDocumentFragment();
-                fragment.appendChild(content);
+                fragment.appendChild(extractedContent);
 
-                // Elimina cualquier etiqueta <font> existente y otros spans con font-size para evitar conflictos
-                fragment.querySelectorAll('font, span[style*="font-size"]').forEach(el => {
+                // *** Limpieza de <span> con font-size y <font> tags ANIDADOS o directos ***
+                fragment.querySelectorAll('span[style*="font-size"], font').forEach(el => {
+                    // Mueve los hijos de la etiqueta a su padre y luego elimina la etiqueta
                     while (el.firstChild) {
                         el.parentNode.insertBefore(el.firstChild, el);
                     }
                     el.parentNode.removeChild(el);
                 });
 
-                // Crea un nuevo <span> con el estilo de font-size y line-height normalizado
-                const span = document.createElement('span');
-                span.style.fontSize = sizeValue;
-                span.style.lineHeight = 'normal'; // CLAVE: Normaliza el interlineado
+                // *** Limpieza de <p> tags problemáticos ***
+                fragment.querySelectorAll('p').forEach(pTag => {
+                    // Si el <p> está vacío o solo contiene <br>, lo removemos
+                    if (pTag.textContent.trim() === '' && pTag.children.length === 0 || pTag.innerHTML.toLowerCase() === '<br>') {
+                        pTag.parentNode.removeChild(pTag);
+                    } else {
+                        // Si el <p> contiene otros bloques (ul, div), lo convertimos en un <div>
+                        // para evitar HTML inválido y que se apile correctamente
+                        const hasBlockChildren = Array.from(pTag.children).some(child => 
+                            ['DIV', 'UL', 'OL', 'LI'].includes(child.tagName)
+                        );
+                        if (hasBlockChildren) {
+                            const div = document.createElement('div');
+                            Array.from(pTag.attributes).forEach(attr => div.setAttribute(attr.name, attr.value));
+                            while (pTag.firstChild) {
+                                div.appendChild(pTag.firstChild);
+                            }
+                            pTag.parentNode.replaceChild(div, pTag);
+                        }
+                    }
+                });
 
-                // Si había contenido, lo envuelve en el nuevo span
+                // *** Aplicar el nuevo estilo ***
+                const newSpan = document.createElement('span');
+                newSpan.style.fontSize = sizeValue;
+                newSpan.style.lineHeight = 'normal'; // CLAVE: Normaliza el interlineado
+
+                // Si hay contenido en el fragmento (después de la limpieza)
                 if (fragment.hasChildNodes()) {
-                    span.appendChild(fragment);
+                    newSpan.appendChild(fragment);
                 } else {
-                    // Si no había contenido (ej. punto de inserción), inserta un span vacío para escribir en él
-                    span.textContent = '\uFEFF'; // Carácter de espacio para que el cursor pueda entrar
+                    // Si no hay contenido (ej. solo el cursor está parpadeando), inserta un span vacío
+                    newSpan.textContent = '\uFEFF'; 
                 }
                 
-                // Inserta el nuevo span en la posición original
-                range.insertNode(span);
-                
-                // Seleccionar el contenido recién insertado para que el usuario pueda seguir escribiendo con ese formato
-                range.selectNodeContents(span);
+                // Insertar el nuevo span en el editor
+                range.insertNode(newSpan);
+
+                // Re-seleccionar el contenido para que el usuario pueda seguir escribiendo con el formato aplicado
+                range.selectNodeContents(newSpan);
                 selection.removeAllRanges();
                 selection.addRange(range);
             }
-            document.getElementById('editor').focus();
+            editor.focus();
         }
 
         // Función para insertar un enlace
@@ -205,29 +230,33 @@
         // Función para generar el HTML final
         function generateHtml() {
             const imageUrl = document.getElementById('imageUrl').value;
-            let richTextContent = document.getElementById('editor').innerHTML;
+            const editorDiv = document.getElementById('editor');
+            let richTextContent = editorDiv.innerHTML;
 
-            // Paso extra de limpieza final antes de generar:
-            // Asegurarse de que no haya <p> tags vacíos o con solo <br> en el contenido final,
-            // y que los <b> tags no tengan line-heights raros si el editor los genera con estilo.
+            // Limpieza final de <p> tags vacíos o con solo <br> y normalización de bloques antes de generar
             const tempDiv = document.createElement('div');
             tempDiv.innerHTML = richTextContent;
 
-            tempDiv.querySelectorAll('p, div, ul, ol, li, b, span').forEach(el => {
-                // Elimina <p> vacíos o con solo <br>
-                if (el.tagName === 'P' && (el.textContent.trim() === '' && el.children.length === 0 || el.innerHTML.toLowerCase() === '<br>')) {
-                    el.parentNode.removeChild(el);
-                    return; // Skip further processing for this element
-                }
-
-                // Normaliza line-height para todos los elementos de texto generados
-                if (el.style.lineHeight) { // Elimina line-heights inline si los puso el editor
-                    el.style.lineHeight = ''; // Se manejará por el CSS externo
-                }
-                // Asegura que los b, i, u tags no tengan line-heights grandes o pesos de fuente extraños
-                if (el.tagName === 'B' || el.tagName === 'I' || el.tagName === 'U') {
-                    el.style.lineHeight = 'inherit';
-                    el.style.fontWeight = 'inherit'; // A veces, los editores dan un font-weight muy alto
+            // Procesa todos los <p> tags
+            tempDiv.querySelectorAll('p').forEach(pTag => {
+                // Si el <p> está vacío o solo contiene <br>, lo removemos
+                if (pTag.textContent.trim() === '' && pTag.children.length === 0 || pTag.innerHTML.toLowerCase() === '<br>') {
+                    pTag.parentNode.removeChild(pTag);
+                } else {
+                    // Si el <p> contiene otros bloques (ul, div), lo convertimos en un <div>
+                    // para evitar HTML inválido en la salida final
+                    const hasBlockChildren = Array.from(pTag.children).some(child => 
+                        ['DIV', 'UL', 'OL', 'LI'].includes(child.tagName)
+                    );
+                    if (hasBlockChildren) {
+                        const div = document.createElement('div');
+                        // Copia atributos (ej. style para alineación)
+                        Array.from(pTag.attributes).forEach(attr => div.setAttribute(attr.name, attr.value));
+                        while (pTag.firstChild) {
+                            div.appendChild(pTag.firstChild);
+                        }
+                        pTag.parentNode.replaceChild(div, pTag);
+                    }
                 }
             });
             richTextContent = tempDiv.innerHTML;
