@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Generador de HTML Responsivo Avanzado</title>
+    <title>Custom HTML Generator</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -164,7 +164,7 @@
         .responsive-content {
             display: flex;
             flex-direction: row; /* Por defecto: texto izquierda, imagen derecha */
-            align-items: flex-start;
+            align-items: center; /* <-- CAMBIO: AHORA CENTRADO VERTICALMENTE */
             gap: 20px;
             flex-wrap: wrap;
         }
@@ -231,24 +231,22 @@
 </head>
 <body>
     <div class="container">
-        <h1>Generador de HTML Responsivo</h1>
-        <p>Ingresa la URL de una imagen y el contenido de tu texto. Utiliza las herramientas de edición para dar formato al texto. El generador adaptará el diseño para computadoras (texto a la izquierda, imagen a la derecha) y celulares (imagen arriba, texto abajo).</p>
+        <h1>Custom HTML Generator</h1>
+        <p>Enter the image URL and your text content. Use the editing tools to format the text.</p>
 
-        <label for="imageUrl">URL de la Imagen:</label>
-        <input type="text" id="imageUrl" placeholder="Ej: https://ejemplo.com/imagen.jpg" value="https://questionpro.com/qp_userimages/sub-3/3284216/plexus%20Logo.png">
-
-        <label for="textContentEditor">Contenido del Texto:</label>
+        <label for="imageUrl">Image URL:</label>
+        <input type="text" id="imageUrl" placeholder="Ej: https://ejemplo.com/imagen.jpg"> <label for="textContentEditor">Text Content:</label>
         <div class="editor-toolbar">
             <button onclick="applyStyle('bold')"><b>B</b></button>
             <button onclick="applyStyle('italic')"><i>I</i></button>
             <button onclick="applyStyle('underline')"><u>U</u></button>
-            <button onclick="applyList('unordered')">Lista</button>
-            <button onclick="applyAlignment('left')">Izquierda</button>
-            <button onclick="applyAlignment('center')">Centrar</button>
-            <button onclick="applyAlignment('right')">Derecha</button>
-            <button onclick="applyAlignment('justify')">Justificar</button>
+            <button onclick="applyList('unordered')">List</button>
+            <button onclick="applyAlignment('left')">Left</button>
+            <button onclick="applyAlignment('center')">Center</button>
+            <button onclick="applyAlignment('right')">Right</button>
+            <button onclick="applyAlignment('justify')">Justify</button>
             <select id="fontSizeSelect" onchange="applyFontSize()">
-                <option value="">Tamaño</option>
+                <option value="">Size</option>
                 <option value="12px">12px</option>
                 <option value="14px">14px</option>
                 <option value="16px">16px</option>
@@ -258,21 +256,16 @@
             </select>
         </div>
         <div id="textContentEditor" contenteditable="true">
-            <p>Esto es una prueba.</p>
-            <p>Perro</p>
-            <p>Gato</p>
-        </div>
-
-        <div class="action-buttons">
-            <button onclick="generateHtml()">Generar HTML</button>
-            <button onclick="copyHtml()" id="copyHtmlButton">Copiar HTML</button>
+        </div> <div class="action-buttons">
+            <button onclick="generateHtml()">Generate HTML</button>
+            <button onclick="copyHtml()" id="copyHtmlButton">Copy HTML</button>
         </div>
 
         <div class="output-section">
-            <h2>Código HTML Generado:</h2>
+            <h2>HTML Code Generated:</h2>
             <pre id="generatedHtmlCode"></pre>
 
-            <h2>Previsualización:</h2>
+            <h2>Preview:</h2>
             <div id="preview-output">
                 </div>
         </div>
@@ -335,7 +328,7 @@
             const textContent = textContentEditor.innerHTML;
 
             if (!imageUrl || !textContent.trim()) {
-                alert('Por favor, ingresa tanto la URL de la imagen como el contenido del texto.');
+                alert('Please insert an image URL and text content to continue.');
                 return;
             }
 
@@ -364,7 +357,7 @@
     .responsive-content {
         display: flex;
         flex-direction: row; /* Por defecto: texto izquierda, imagen derecha */
-        align-items: flex-start;
+        align-items: center; /* <-- CAMBIO: AHORA CENTRADO VERTICALMENTE */
         gap: 20px;
         flex-wrap: wrap;
     }
@@ -435,17 +428,14 @@
             const htmlCode = document.getElementById('generatedHtmlCode').textContent;
             navigator.clipboard.writeText(htmlCode).then(() => {
                 const copyButton = document.getElementById('copyHtmlButton');
-                copyButton.textContent = '¡Copiado!';
+                copyButton.textContent = '¡Copied!';
                 setTimeout(() => {
-                    copyButton.textContent = 'Copiar HTML';
+                    copyButton.textContent = 'Copy HTML';
                 }, 2000);
             }).catch(err => {
-                alert('Error al copiar el HTML: ' + err);
+                alert('Error copying the HTML. Copy manually: ' + err);
             });
         }
-
-        // Initialize with default content
-        textContentEditor.innerHTML = '<p>Esto es una prueba.</p><p>Perro</p><p>Gato</p>';
     </script>
 </body>
 </html>
